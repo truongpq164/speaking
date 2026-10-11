@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Đăng nhập – English Tiếng Anh Tư Duy</title>
+<!-- v3.8 (10/10/2026) Trang học sinh: Đăng nhập / Đăng ký / Chờ duyệt / Đổi mật khẩu tạm.
+     Đặt trên GitHub Pages (kho truongpq164/speaking). Gọi máy chủ Apps Script /exec bằng fetch POST text/plain,
+     KHÔNG gửi cookie Google (credentials:'omit') – chạy được cả trên trình duyệt đăng nhập tài khoản Google dưới 13 tuổi.
+     API mở (TaiKhoan.gs): tkLopMo, tkGoiYTen, tkDangKy, tkDangNhap, tkQuenMk, tkDoiMk. Giao diện số 2 – Tông vàng. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --stage:#F4F6F8; --win:#FFFFFF; --ink:#1A1B2A; --ink2:#4A4C58; --mute:#5F6787;
+  --field:#F6F7F9; --field-line:#E3E5EA; --rule:#F0F1F4; --head-rule:#EEF0F3;
+  --brand:#E8771A; --btn:#D9690F; --btn-hover:#C75E0B;
+  --tab-bg:#FFE4D6; --tab-ink:#B13A22; --sec-bg:#FFF1EA; --sec-line:#FFC9B6; --underline:#F2735A;
+  --ok-ink:#1F6B33; --ok-bg:#E3F4E6; --wait-ink:#8A5A00; --wait-bg:#FFF4DC; --err-ink:#C62828; --err-bg:#FDECEC;
+  --c1:#FFE43D;
+  --f:"Be Vietnam Pro","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{min-height:100vh;background:var(--stage);color:var(--ink);font:14px/1.5 var(--f);display:grid;place-items:start center;padding:24px 16px 40px}
+.khung{background:var(--win);border-radius:28px;box-shadow:0 1px 2px rgba(26,27,42,.06),0 10px 30px rgba(26,27,42,.08);padding:20px 20px 24px;width:100%;max-width:400px;display:grid;gap:14px}
+.dau{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--head-rule)}
+.icon{width:44px;height:44px;border-radius:14px;background:var(--brand);display:grid;place-items:center;color:#fff;font-weight:800;font-size:18px;flex:none}
+.dau .nm{font-weight:800;font-size:17px;line-height:1.2}
+.dau .ds{font-size:12px;color:var(--mute)}
+.dau .logo{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--brand);text-align:right;line-height:1.15}
+.tabs{display:flex;gap:6px}
+.tab{all:unset;cursor:pointer;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:99px;color:var(--mute)}
+.tab[aria-selected="true"]{background:var(--tab-bg);color:var(--tab-ink)}
+.muc{display:grid;gap:14px}
+.sec{font-size:15px;font-weight:700;display:grid;gap:4px;margin:2px 0 0}
+.sec::after{content:"";width:22px;height:3px;border-radius:2px;background:var(--underline)}
+label.f{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--field);border:1.5px solid var(--field-line);border-radius:14px;padding:11px 14px;width:100%}
+input:focus,select:focus{border-color:var(--brand);outline:none}
+input::placeholder{color:var(--mute)}
+.o-mk{position:relative}
+.o-mk input{padding-right:64px}
+.hienmk{all:unset;cursor:pointer;position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--tab-ink);padding:6px 8px;border-radius:10px}
+.nut{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;background:var(--btn);color:#fff;font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;border-radius:16px;padding:14px 18px;min-height:52px}
+.nut:hover{background:var(--btn-hover)}
+.nut[disabled]{opacity:.6;cursor:progress}
+.nut2{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;font-weight:600;font-size:13.5px;padding:10px 14px;border-radius:12px;background:var(--sec-bg);border:1px solid var(--sec-line);color:var(--tab-ink)}
+.lnk{all:unset;cursor:pointer;color:var(--tab-ink);font-weight:600;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.tab:focus-visible,.nut:focus-visible,.nut2:focus-visible,.lnk:focus-visible,.hienmk:focus-visible,.goiy button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.hint{font-size:12px;color:var(--mute)}
+.hang{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tb{border-radius:14px;padding:10px 12px;font-size:13px}
+.tb.loi{background:var(--err-bg);color:var(--err-ink)}
+.tb.ok{background:var(--ok-bg);color:var(--ok-ink)}
+.goiy{background:var(--win);border:1px solid var(--field-line);border-radius:14px;overflow:hidden;margin-top:-8px}
+.goiy button{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;padding:9px 14px;font-size:14px;border-top:1px solid var(--rule)}
+.goiy button:first-child{border-top:0}
+.goiy button:hover{background:var(--sec-bg)}
+.goiy small{color:var(--mute);margin-left:6px}
+.cho{display:grid;gap:10px;justify-items:center;text-align:center;padding:20px 10px;border-radius:20px;background:var(--field)}
+.dongho{width:58px;height:58px;border-radius:50%;background:var(--c1);display:grid;place-items:center}
+.cho h2{margin:0;font-size:17px}
+.cho p{margin:0;color:var(--ink2);font-size:13.5px;max-width:32ch}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--wait-bg);color:var(--wait-ink)}
+.chan{text-align:center;font-size:11.5px;color:var(--mute)}
+@media (max-width:420px){body{padding:12px 10px 28px}.khung{padding:16px 14px 20px;border-radius:22px}}
+</style>
+</head>
+<body>
+<main class="khung" aria-labelledby="tieuDe">
+  <div class="dau"><div class="icon" aria-hidden="true">E</div><div><div class="nm" id="tieuDe">English</div><div class="ds">Tiếng Anh Tư Duy</div></div><div class="logo" aria-hidden="true">TIẾNG ANH<br>TƯ DUY</div></div>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" id="tDn" aria-selected="true" aria-controls="pDn">Đăng nhập</button>
+    <button class="tab" role="tab" id="tDk" aria-selected="false" aria-controls="pDk">Đăng ký</button>
+  </div>
+
+  <!-- ĐĂNG NHẬP -->
+  <form class="muc" id="pDn" role="tabpanel" aria-labelledby="tDn" novalidate>
+    <div class="sec">Chào em!</div>
+    <label class="f">Tên đăng nhập<input id="dnUser" autocomplete="username" autocapitalize="none" spellcheck="false" inputmode="email" maxlength="30" required></label>
+    <label class="f">Mật khẩu<span class="o-mk"><input id="dnMk" type="password" autocomplete="current-password" maxlength="64" required><button type="button" class="hienmk" data-mk="dnMk" aria-label="Hiện mật khẩu">Hiện</button></span></label>
+    <button class="nut" id="dnNut" type="submit">Vào học</button>
+    <div class="hang"><button class="lnk" type="button" id="quenMk">Quên mật khẩu?</button><span class="hint">Chưa có tài khoản? Chọn tab Đăng ký</span></div>
+    <div class="tb" id="dnTb" role="status" aria-live="polite" hidden></div>
+  </form>
+
+  <!-- ĐĂNG KÝ -->
+  <form class="muc" id="pDk" role="tabpanel" aria-labelledby="tDk" novalidate hidden>
+    <label class="f">Lớp của em<select id="dkLop" required><option value="">Đang tải danh sách lớp…</option></select></label>
+    <label class="f">Họ và tên<input id="dkTen" autocomplete="name" maxlength="60" required aria-describedby="dkTenGoiY" aria-autocomplete="list"></label>
+    <div class="goiy" id="dkTenGoiY" role="listbox" aria-label="Gợi ý tên trong lớp" hidden></div>
+    <label class="f">Tên đăng nhập<input id="dkUser" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="30" required aria-describedby="dkUserHint"></label>
+    <span class="hint" id="dkUserHint">3–30 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới. Ví dụ: minhanh.6a</span>
+    <label class="f">Mật khẩu (từ 6 ký tự)<span class="o-mk"><input id="dkMk" type="password" autocomplete="new-password" minlength="6" maxlength="64" required><button type="button" class="hienmk" data-mk="dkMk" aria-label="Hiện mật khẩu">Hiện</button></span></label>
+    <button class="nut" id="dkNut" type="submit">Gửi đăng ký</button>
+    <div class="tb" id="dkTb" role="status" aria-live="polite" hidden></div>
+  </form>
+
+  <!-- CHỜ DUYỆT -->
+  <section class="muc" id="pCho" aria-live="polite" hidden>
+    <div class="cho">
+      <div class="dongho" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1A1B2A" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <h2 id="choTd">Đã gửi! Đang chờ duyệt</h2>
+      <p id="choNd"></p>
+      <span class="pill">● Chờ duyệt</span>
+    </div>
+    <button class="nut2" type="button" id="choVe">Về trang đăng nhập</button>
+  </section>
+
+  <!-- ĐỔI MẬT KHẨU TẠM -->
+  <form class="muc" id="pDoi" novalidate hidden>
+    <div class="sec">Đặt mật khẩu mới</div>
+    <p class="hint" id="doiChao" style="margin:0">Thầy/Cô vừa đặt lại mật khẩu cho em. Em tự đặt mật khẩu mới rồi vào học nhé.</p>
+    <label class="f">Mật khẩu mới (từ 6 ký tự)<span class="o-mk"><input id="doiMk" type="password" autocomplete="new-password" minlength="6" maxlength="64" required><button type="button" class="hienmk" data-mk="doiMk" aria-label="Hiện mật khẩu">Hiện</button></span></label>
+    <label class="f">Nhập lại mật khẩu mới<input id="doiMk2" type="password" autocomplete="new-password" maxlength="64" required></label>
+    <button class="nut" id="doiNut" type="submit">Lưu và vào học</button>
+    <div class="tb" id="doiTb" role="status" aria-live="polite" hidden></div>
+  </form>
+
+  <!-- VÀO HỌC (dự phòng khi trình duyệt chặn chuyển trang) -->
+  <section class="muc" id="pVao" hidden>
+    <div class="tb ok" id="vaoTb">Đăng nhập thành công. Đang mở lớp học…</div>
+    <a class="nut" id="vaoLink" href="#">Mở lớp học</a>
+    <a class="lnk" id="vaoPhong" href="phong.html" style="justify-self:center">Vào thẳng phòng luyện nói</a>
+  </section>
+
+  <div class="chan">© Tiếng Anh Tư Duy</div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var EXEC = 'https://script.google.com/macros/s/AKfycbyo-tmNmQm-VOGJ7ptmbE5aAwCQhBrBDJSmgdIgme0pfdvLtadA6tdeoEZhH5gLVbXpRA/exec';
+  var USER_RE = /^[a-z0-9][a-z0-9._]{2,29}$/;
+  var $ = function (id) { return document.getElementById(id); };
+  function nho(k, v) { try { if (v === undefined) return localStorage.getItem(k) || ''; if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return ''; } }
+  function nhoTab(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* bỏ qua */ } }
+
+  // ---- Gọi máy chủ: POST text/plain (không preflight), không cookie Google ----
+  function goi(fn) {
+    var args = [].slice.call(arguments, 1);
+    var hetGio = new Promise(function (ok, ko) { setTimeout(function () { ko(new Error('Máy chủ trả lời chậm quá. Em kiểm tra mạng rồi thử lại nhé.')); }, 40000); });
+    return Promise.race([fetch(EXEC, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ fn: fn, args: args, tok: '' }) })
+      .then(function (r) { if (!r.ok) throw new Error('Máy chủ đang bận (mã ' + r.status + '). Em thử lại sau ít phút nhé.'); return r.json(); }), hetGio])
+      .then(function (j) { if (j && j.err) throw new Error(String(j.err).replace(/^[A-Z_]+: /, '')); return j ? j.res : null; },
+        function (e) { if (e instanceof TypeError) throw new Error('Chưa kết nối được máy chủ. Em kiểm tra mạng rồi thử lại nhé.'); throw e; });
+  }
+  function bao(id, msg, loai) { var el = $(id); el.textContent = msg || ''; el.className = 'tb ' + (loai || 'loi'); el.hidden = !msg; }
+  function ban(nut, dang, chu) { nut.disabled = dang; if (chu) nut.textContent = chu; }
+
+  // ---- Chuyển màn ----
+  var MAN = ['pDn', 'pDk', 'pCho', 'pDoi', 'pVao'];
+  function man(id) {
+    MAN.forEach(function (m) { $(m).hidden = m !== id; });
+    var coTab = id === 'pDn' || id === 'pDk';
+    $('tabs').hidden = !coTab;
+    if (coTab) { $('tDn').setAttribute('aria-selected', String(id === 'pDn')); $('tDk').setAttribute('aria-selected', String(id === 'pDk')); }
+    if (id === 'pDk') taiLop();
+  }
+  $('tDn').onclick = function () { man('pDn'); $('dnUser').focus(); };
+  $('tDk').onclick = function () { man('pDk'); };
+  $('choVe').onclick = function () { man('pDn'); $('dnMk').value = ''; $('dnMk').focus(); };
+  [].forEach.call(document.querySelectorAll('.hienmk'), function (b) {
+    b.onclick = function () { var i = $(b.dataset.mk), hien = i.type === 'password'; i.type = hien ? 'text' : 'password'; b.textContent = hien ? 'Ẩn' : 'Hiện'; b.setAttribute('aria-label', hien ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'); };
+  });
+  function chuanUser(s) { return String(s || '').trim().toLowerCase(); }
+
+  // ---- Vào học: lưu vé cho các trang trên GitHub Pages rồi mở trang chủ ----
+  function vaoHoc(r) {
+    nho('sp_tok', r.tok); nhoTab('sp_tok', r.tok);
+    var url = EXEC + '?t=' + encodeURIComponent(r.tok);
+    $('vaoLink').href = url;
+    $('vaoPhong').href = 'phong.html#t=' + encodeURIComponent(r.tok);
+    $('vaoTb').textContent = 'Chào ' + (r.ten || 'em') + '! Đang mở lớp học…';
+    man('pVao');
+    location.assign(url);
+  }
+  function choDuyet(r, moi) {
+    $('choTd').textContent = moi ? 'Đã gửi! Đang chờ duyệt' : 'Tài khoản đang chờ duyệt';
+    $('choNd').textContent = (r.nguoiDuyet ? r.nguoiDuyet : 'Thầy/Cô') + ' (lớp ' + (r.lop || '') + ') sẽ duyệt cho em. Khi được duyệt, em đăng nhập lại là vào học được.';
+    man('pCho');
+  }
+
+  // ---- Đăng nhập ----
+  var MK_TAM = { user: '', mk: '' };
+  $('dnUser').value = nho('tk_user');
+  $('pDn').onsubmit = function (ev) {
+    ev.preventDefault();
+    var user = chuanUser($('dnUser').value), mk = $('dnMk').value, nut = $('dnNut');
+    if (!user || !mk) return bao('dnTb', 'Em nhập tên đăng nhập và mật khẩu nhé.');
+    bao('dnTb', ''); ban(nut, true, 'Đang kiểm tra…');
+    goi('tkDangNhap', user, mk).then(function (r) {
+      nho('tk_user', user);
+      if (r.tt === 'da_duyet' && r.tok) return vaoHoc(r);
+      if (r.tt === 'doi_mk') { MK_TAM = { user: user, mk: mk }; $('doiChao').textContent = 'Chào ' + (r.ten || 'em') + '! Thầy/Cô vừa đặt lại mật khẩu cho em. Em tự đặt mật khẩu mới rồi vào học nhé.'; man('pDoi'); $('doiMk').focus(); return; }
+      if (r.tt === 'cho_duyet') return choDuyet(r, false);
+      bao('dnTb', 'Máy chủ trả lời lạ. Em thử lại sau ít phút nhé.');
+    }).catch(function (e) { bao('dnTb', e.message); $('dnMk').select(); })
+      .then(function () { ban(nut, false, 'Vào học'); });
+  };
+  $('quenMk').onclick = function () {
+    var user = chuanUser($('dnUser').value);
+    if (!USER_RE.test(user)) { bao('dnTb', 'Em ghi tên đăng nhập vào ô trên rồi bấm Quên mật khẩu nhé.'); $('dnUser').focus(); return; }
+    var b = $('quenMk'); b.disabled = true;
+    goi('tkQuenMk', user).then(function (r) { bao('dnTb', (r && r.tb) || 'Đã gửi yêu cầu.', 'ok'); })
+      .catch(function (e) { bao('dnTb', e.message); }).then(function () { b.disabled = false; });
+  };
+
+  // ---- Đổi mật khẩu tạm ----
+  $('pDoi').onsubmit = function (ev) {
+    ev.preventDefault();
+    var a = $('doiMk').value, b = $('doiMk2').value, nut = $('doiNut');
+    if (a.length < 6) return bao('doiTb', 'Mật khẩu cần ít nhất 6 ký tự.');
+    if (a !== b) return bao('doiTb', 'Hai ô mật khẩu chưa giống nhau.');
+    if (!MK_TAM.user) { man('pDn'); return; }
+    bao('doiTb', ''); ban(nut, true, 'Đang lưu…');
+    goi('tkDoiMk', MK_TAM.user, MK_TAM.mk, a).then(function (r) { MK_TAM = { user: '', mk: '' }; vaoHoc(r); })
+      .catch(function (e) { bao('doiTb', e.message); }).then(function () { ban(nut, false, 'Lưu và vào học'); });
+  };
+
+  // ---- Đăng ký ----
+  var LOP_DA_TAI = false;
+  function taiLop() {
+    if (LOP_DA_TAI) return;
+    LOP_DA_TAI = true;
+    var s = $('dkLop');
+    goi('tkLopMo').then(function (ds) {
+      ds = ds || [];
+      if (!ds.length) { s.innerHTML = '<option value="">Chưa có lớp nào nhận đăng ký</option>'; bao('dkTb', 'Hiện chưa lớp nào mở đăng ký. Em hỏi Thầy/Cô nhé.'); LOP_DA_TAI = false; return; }
+      s.innerHTML = '';
+      var o0 = document.createElement('option'); o0.value = ''; o0.textContent = '– Chọn lớp –'; s.appendChild(o0);
+      ds.forEach(function (l) { var o = document.createElement('option'); o.value = l; o.textContent = l; s.appendChild(o); });
+      var cu = nho('tk_lop'); if (cu && ds.indexOf(cu) >= 0) s.value = cu;
+    }).catch(function (e) { s.innerHTML = '<option value="">Chưa tải được danh sách lớp</option>'; bao('dkTb', e.message); LOP_DA_TAI = false; });
+  }
+  // Gợi ý tên tiếng Anh của lớp (gõ từ 3 ký tự)
+  var hen = 0, lanHoi = 0;
+  function anGoiY() { $('dkTenGoiY').hidden = true; $('dkTenGoiY').innerHTML = ''; }
+  $('dkTen').addEventListener('input', function () {
+    clearTimeout(hen);
+    var q = $('dkTen').value.trim(), lop = $('dkLop').value;
+    if (q.length < 3 || !lop) return anGoiY();
+    hen = setTimeout(function () {
+      var so = ++lanHoi;
+      goi('tkGoiYTen', lop, q).then(function (ds) {
+        if (so !== lanHoi) return;
+        ds = (ds || []).filter(function (t) { return t && t.toLowerCase() !== q.toLowerCase(); });
+        if (!ds.length) return anGoiY();
+        var hop = $('dkTenGoiY'); hop.innerHTML = '';
+        ds.forEach(function (t) {
+          var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'option'); b.textContent = t;
+          var sm = document.createElement('small'); sm.textContent = 'lớp ' + lop; b.appendChild(sm);
+          b.onclick = function () { $('dkTen').value = t; anGoiY(); goiYUser(); $('dkUser').focus(); };
+          hop.appendChild(b);
+        });
+        hop.hidden = false;
+      }).catch(function () { anGoiY(); });
+    }, 350);
+  });
+  $('dkLop').onchange = function () { anGoiY(); nho('tk_lop', $('dkLop').value); goiYUser(); };
+  $('pDk').addEventListener('input', function () { if (!$('dkTb').hidden && !$('dkNut').disabled) bao('dkTb', ''); });
+  $('pDn').addEventListener('input', function () { if (!$('dnTb').hidden && !$('dnNut').disabled) bao('dnTb', ''); });
+  // Gợi ý tên đăng nhập từ họ tên + lớp (chỉ khi em chưa tự gõ)
+  var userTuGo = false;
+  $('dkUser').addEventListener('input', function () { userTuGo = !!$('dkUser').value; });
+  function boDau(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D'); }
+  function goiYUser() {
+    if (userTuGo) return;
+    var w = boDau($('dkTen').value).toLowerCase().replace(/[^a-z0-9 ]/g, ' ').trim().split(/\s+/).filter(String);
+    if (!w.length) { $('dkUser').value = ''; return; }
+    var lop = boDau($('dkLop').value).toLowerCase().replace(/[^a-z0-9]/g, '');
+    var u = (w.slice(-2).join('') + (lop ? '.' + lop : '')).slice(0, 30);
+    $('dkUser').value = USER_RE.test(u) ? u : '';
+  }
+  $('dkTen').addEventListener('change', goiYUser);
+  $('dkTen').addEventListener('blur', function () { setTimeout(anGoiY, 200); goiYUser(); });
+
+  $('pDk').onsubmit = function (ev) {
+    ev.preventDefault();
+    var lop = $('dkLop').value, ten = $('dkTen').value.trim().replace(/\s+/g, ' '), user = chuanUser($('dkUser').value), mk = $('dkMk').value, nut = $('dkNut');
+    if (!lop) return bao('dkTb', 'Em chọn lớp của mình nhé.');
+    if (ten.length < 2) return bao('dkTb', 'Em ghi đủ họ và tên nhé.');
+    if (!USER_RE.test(user)) return bao('dkTb', 'Tên đăng nhập 3–30 ký tự, bắt đầu bằng chữ hoặc số, chỉ gồm chữ không dấu, số, dấu chấm hoặc gạch dưới.');
+    if (mk.length < 6) return bao('dkTb', 'Mật khẩu cần ít nhất 6 ký tự.');
+    bao('dkTb', ''); ban(nut, true, 'Đang gửi…');
+    goi('tkDangKy', { user: user, ten: ten, lop: lop, mk: mk }).then(function (r) {
+      nho('tk_user', user); $('dnUser').value = user; $('dkMk').value = '';
+      choDuyet(r || { lop: lop }, true);
+    }).catch(function (e) { bao('dkTb', e.message); }).then(function () { ban(nut, false, 'Gửi đăng ký'); });
+  };
+
+  // Mở đúng tab theo link (#dangky) – mặc định Đăng nhập
+  if (/dang-?ky/i.test(location.hash)) man('pDk'); else { man('pDn'); if (!$('dnUser').value) $('dnUser').focus(); }
+})();
+</script>
+</body>
+</html>
